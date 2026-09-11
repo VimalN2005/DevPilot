@@ -1,0 +1,249 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- AI Pipeline Prominent Glow & Gradient -->
+    <linearGradient id="pipelineGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="50%" stop-color="#311042" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <linearGradient id="pipelineBorder" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#60a5fa" />
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#c084fc" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#34d399" />
+    </marker>
+
+    <!-- Drop Shadows -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="pipelineGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#a855f7" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1600" height="900" fill="url(#bgGrad)" />
+
+  <!-- Blueprint Grid -->
+  <g stroke="#1e293b" stroke-width="0.75" opacity="0.35">
+    <line x1="200" y1="0" x2="200" y2="900" />
+    <line x1="500" y1="0" x2="500" y2="900" />
+    <line x1="800" y1="0" x2="800" y2="900" />
+    <line x1="1100" y1="0" x2="1100" y2="900" />
+    <line x1="1400" y1="0" x2="1400" y2="900" />
+    <line x1="0" y1="150" x2="1600" y2="150" />
+    <line x1="0" y1="350" x2="1600" y2="350" />
+    <line x1="0" y1="550" x2="1600" y2="550" />
+    <line x1="0" y1="750" x2="1600" y2="750" />
+  </g>
+
+  <!-- Title Header -->
+  <g text-anchor="middle">
+    <text x="800" y="45" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="#f8fafc" letter-spacing="1.5">DEVPILOT SYSTEM ARCHITECTURE</text>
+    <text x="800" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" fill="#94a3b8" letter-spacing="0.5">Production-Grade Codebase Intelligence, Streaming RAG &amp; Multi-Agent Workflow Engine</text>
+  </g>
+
+  <!-- ==================== 1. FRONTEND LAYER ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="520" y="92" width="560" height="52" rx="10" fill="#131d2e" stroke="#3b82f6" stroke-width="1.75" />
+    <text x="800" y="117" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="700" fill="#f1f5f9">
+      Frontend Developer Workspace (Next.js / Dark Theme SPA)
+    </text>
+    <text x="800" y="134" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="600" fill="#60a5fa">
+      Repository Studio  •  Streaming RAG Chat  •  Issue Triage  •  PR Review Hub  •  Agent Studio
+    </text>
+  </g>
+
+  <!-- Arrow Frontend -> API Gateway -->
+  <line x1="800" y1="144" x2="800" y2="175" stroke="#60a5fa" stroke-width="2" marker-end="url(#arrow-blue)" />
+  <text x="880" y="164" font-family="ui-monospace, SFMono-Regular, monospace" font-size="10.5" fill="#93c5fd">HTTP / SSE Stream</text>
+
+  <!-- ==================== 2. FASTAPI API GATEWAY ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="440" y="177" width="720" height="68" rx="10" fill="#172236" stroke="#2563eb" stroke-width="2" />
+    <text x="800" y="204" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="800" fill="#ffffff">
+      FastAPI API Gateway
+    </text>
+    <text x="800" y="227" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="600" fill="#93c5fd">
+      JWT Access &amp; Refresh Rotation (JTI Tracking)  •  RBAC (Admin/Dev/Viewer)  •  100 req/min Sliding-Window Rate Limiter
+    </text>
+  </g>
+
+  <!-- 3 Branching Arrows from Gateway to Infrastructure -->
+  <line x1="560" y1="245" x2="300" y2="288" stroke="#60a5fa" stroke-width="1.75" marker-end="url(#arrow-blue)" />
+  <line x1="800" y1="245" x2="800" y2="288" stroke="#60a5fa" stroke-width="2" marker-end="url(#arrow-blue)" />
+  <line x1="1040" y1="245" x2="1300" y2="288" stroke="#60a5fa" stroke-width="1.75" marker-end="url(#arrow-blue)" />
+
+  <!-- ==================== 3. DATA & WORKER INFRASTRUCTURE ==================== -->
+  <!-- Box A: PostgreSQL + pgvector -->
+  <g filter="url(#shadow)">
+    <rect x="140" y="290" width="320" height="74" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+    <text x="300" y="315" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#38bdf8">
+      PostgreSQL + pgvector
+    </text>
+    <text x="300" y="335" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#f1f5f9">
+      Users, Repositories &amp; Audit Logs
+    </text>
+    <text x="300" y="352" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#94a3b8">
+      768-dim Dense Code Chunk Embeddings
+    </text>
+  </g>
+
+  <!-- Box B: Redis Cache & Store -->
+  <g filter="url(#shadow)">
+    <rect x="640" y="290" width="320" height="74" rx="8" fill="#291515" stroke="#f43f5e" stroke-width="1.5" />
+    <text x="800" y="315" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#fb7185">
+      Redis In-Memory Store
+    </text>
+    <text x="800" y="335" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#f1f5f9">
+      Sliding-Window Rate Limiting
+    </text>
+    <text x="800" y="352" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#94a3b8">
+      Token Bucket Cache &amp; Celery Broker
+    </text>
+  </g>
+
+  <!-- Box C: Celery Background Workers -->
+  <g filter="url(#shadow)">
+    <rect x="1140" y="290" width="320" height="74" rx="8" fill="#14261c" stroke="#10b981" stroke-width="1.5" />
+    <text x="1300" y="315" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#34d399">
+      Celery Async Worker
+    </text>
+    <text x="1300" y="335" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#f1f5f9">
+      Repository Ingestion &amp; AST Parsing
+    </text>
+    <text x="1300" y="352" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10.5" fill="#94a3b8">
+      Polling via GET /api/v1/jobs/{job_id}
+    </text>
+  </g>
+
+  <!-- 3 Converging Arrows into AI Pipeline -->
+  <line x1="300" y1="364" x2="560" y2="408" stroke="#38bdf8" stroke-width="1.75" marker-end="url(#arrow-blue)" />
+  <line x1="800" y1="364" x2="800" y2="408" stroke="#c084fc" stroke-width="2" marker-end="url(#arrow-purple)" />
+  <line x1="1300" y1="364" x2="1040" y2="408" stroke="#10b981" stroke-width="1.75" marker-end="url(#arrow-emerald)" />
+
+  <!-- ==================== 4. PROMINENT AI PIPELINE CONTAINER ==================== -->
+  <g filter="url(#pipelineGlow)">
+    <rect x="140" y="410" width="1320" height="230" rx="14" fill="url(#pipelineGrad)" stroke="url(#pipelineBorder)" stroke-width="2.5" />
+    <text x="800" y="440" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="17" font-weight="800" fill="#ffffff" letter-spacing="1">
+      DEVPILOT CORE AI ENGINE &amp; MULTI-AGENT PIPELINE
+    </text>
+  </g>
+
+  <!-- 5 Internal Engine Cards -->
+  <!-- Card 1: AST Code Parser -->
+  <g filter="url(#shadow)">
+    <rect x="170" y="460" width="220" height="85" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1.25" />
+    <text x="280" y="484" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" fill="#38bdf8">AST Structural Parser</text>
+    <text x="280" y="504" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">Python ast &amp; Multi-Language</text>
+    <text x="280" y="522" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#94a3b8">Classes, Funcs, Docstrings</text>
+  </g>
+
+  <!-- Card 2: Dense Embedding & RRF -->
+  <g filter="url(#shadow)">
+    <rect x="420" y="460" width="230" height="85" rx="8" fill="#0f172a" stroke="#6366f1" stroke-width="1.25" />
+    <text x="535" y="484" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" fill="#818cf8">Hybrid RAG &amp; Reranker</text>
+    <text x="535" y="504" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">Cosine Similarity + BM25</text>
+    <text x="535" y="522" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#94a3b8">Reciprocal Rank Fusion (RRF)</text>
+  </g>
+
+  <!-- Card 3: Issue Analyzer -->
+  <g filter="url(#shadow)">
+    <rect x="680" y="460" width="240" height="85" rx="8" fill="#0f172a" stroke="#ec4899" stroke-width="1.25" />
+    <text x="800" y="484" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" fill="#f472b6">AI Issue Analyzer</text>
+    <text x="800" y="504" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">Severity, Modules &amp; Root Cause</text>
+    <text x="800" y="522" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#94a3b8">Generates test_expired_token()</text>
+  </g>
+
+  <!-- Card 4: PR Review Agent -->
+  <g filter="url(#shadow)">
+    <rect x="950" y="460" width="240" height="85" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="1.25" />
+    <text x="1070" y="484" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" fill="#fbbf24">8-Dimension PR Review</text>
+    <text x="1070" y="504" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">Security, SQL, API, Tests, Perf</text>
+    <text x="1070" y="522" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#94a3b8">Verdict &amp; Line Recommendations</text>
+  </g>
+
+  <!-- Card 5: Telemetry Logger -->
+  <g filter="url(#shadow)">
+    <rect x="1220" y="460" width="210" height="85" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.25" />
+    <text x="1325" y="484" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" fill="#34d399">AI Observability</text>
+    <text x="1325" y="504" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" fill="#cbd5e1">Latency, Tokens, Cost ($)</text>
+    <text x="1325" y="522" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9.5" fill="#94a3b8">eval/ Benchmark Harness</text>
+  </g>
+
+  <!-- Sub-Card: Multi-Agent Workflow with Human Gate -->
+  <g filter="url(#shadow)">
+    <rect x="170" y="560" width="1260" height="65" rx="8" fill="#171e33" stroke="#a855f7" stroke-width="1.5" />
+    <text x="260" y="597" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#c084fc">
+      Multi-Agent State Machine:
+    </text>
+    <text x="440" y="597" font-family="ui-monospace, monospace" font-size="11.5" font-weight="600" fill="#f8fafc">
+      Planner ──► Repo Search ──► Code Analysis ──► Test Agent ──► Reviewer
+    </text>
+    <!-- Human Gate Badge -->
+    <rect x="1040" y="572" width="370" height="40" rx="6" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" stroke-width="1.2" />
+    <text x="1225" y="596" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11.5" font-weight="700" fill="#f59e0b">
+      🛡️ MANDATORY HUMAN APPROVAL GATE
+    </text>
+  </g>
+
+  <!-- 4 Downward Arrows to Foundation/Output Layer -->
+  <line x1="280" y1="640" x2="280" y2="695" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow-blue)" />
+  <line x1="620" y1="640" x2="620" y2="695" stroke="#c084fc" stroke-width="2" marker-end="url(#arrow-purple)" />
+  <line x1="980" y1="640" x2="980" y2="695" stroke="#ec4899" stroke-width="2" marker-end="url(#arrow-purple)" />
+  <line x1="1320" y1="640" x2="1320" y2="695" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-emerald)" />
+
+  <!-- ==================== 5. INTEGRATIONS & OUTPUTS ==================== -->
+  <!-- Box 1: GitHub API -->
+  <g filter="url(#shadow)">
+    <rect x="140" y="700" width="280" height="66" rx="8" fill="#131d2e" stroke="#60a5fa" stroke-width="1.5" />
+    <text x="280" y="726" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13.5" font-weight="700" fill="#93c5fd">GitHub Repositories</text>
+    <text x="280" y="746" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#cbd5e1">Git Clone, Issues &amp; PR Diffs</text>
+  </g>
+
+  <!-- Box 2: Vector Search DB -->
+  <g filter="url(#shadow)">
+    <rect x="480" y="700" width="280" height="66" rx="8" fill="#161d30" stroke="#818cf8" stroke-width="1.5" />
+    <text x="620" y="726" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13.5" font-weight="700" fill="#a5b4fc">Vector Database</text>
+    <text x="620" y="746" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#cbd5e1">pgvector &lt;=&gt; Cosine Distance</text>
+  </g>
+
+  <!-- Box 3: LLM Providers -->
+  <g filter="url(#shadow)">
+    <rect x="820" y="700" width="300" height="66" rx="8" fill="#24132b" stroke="#c084fc" stroke-width="1.5" />
+    <text x="970" y="726" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13.5" font-weight="700" fill="#e9d5ff">Foundation LLM APIs</text>
+    <text x="970" y="746" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#cbd5e1">Gemini 2.5 Flash  •  OpenAI  •  Ollama</text>
+  </g>
+
+  <!-- Box 4: Streaming SSE & Evaluation -->
+  <g filter="url(#shadow)">
+    <rect x="1180" y="700" width="280" height="66" rx="8" fill="#13241b" stroke="#10b981" stroke-width="1.5" />
+    <text x="1320" y="726" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13.5" font-weight="700" fill="#6ee7b7">Evaluation &amp; SSE Stream</text>
+    <text x="1320" y="746" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#cbd5e1">100% Recall  •  0.14s Latency</text>
+  </g>
+
+  <!-- Bottom Brand Watermark -->
+  <g text-anchor="middle" opacity="0.6">
+    <text x="800" y="865" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#64748b">
+      DevPilot  •  Production AI Engineering Platform  •  github.com/VimalN2005/DevPilot
+    </text>
+  </g>
+</svg>

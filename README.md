@@ -1,4 +1,4 @@
-﻿# DevPilot
+# DevPilot
 
 > **Production-grade AI Backend for Codebase Intelligence & Developer Automation**
 
@@ -24,6 +24,10 @@ As codebases scale across hundreds of files and microservices, onboarding develo
 ---
 
 ## Architecture
+
+<p align="center">
+  <img src="assets/architecture.svg" alt="DevPilot System Architecture Diagram" width="100%" />
+</p>
 
 ```
                     ┌─────────────────────────┐
