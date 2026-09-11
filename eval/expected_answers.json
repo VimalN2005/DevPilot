@@ -1,0 +1,50 @@
+﻿{
+  "q1": {
+    "target_module": "app/core/security.py",
+    "alternative_modules": ["app/api/v1/auth.py"],
+    "key_symbols": ["create_access_token", "create_refresh_token", "decode_token"],
+    "expected_answer": "JWT authentication and token creation are implemented in backend/app/core/security.py using create_access_token and create_refresh_token."
+  },
+  "q2": {
+    "target_module": "app/core/rbac.py",
+    "alternative_modules": ["app/api/v1/auth.py"],
+    "key_symbols": ["UserRole", "require_role", "ROLE_HIERARCHY"],
+    "expected_answer": "Role-based access control is defined in backend/app/core/rbac.py with UserRole enum and require_role dependency."
+  },
+  "q3": {
+    "target_module": "app/core/rate_limiter.py",
+    "alternative_modules": ["app/main.py"],
+    "key_symbols": ["RateLimiter", "check_rate_limit", "is_allowed"],
+    "expected_answer": "Sliding-window rate limiting is implemented in backend/app/core/rate_limiter.py with Redis and in-memory fallback."
+  },
+  "q4": {
+    "target_module": "app/services/code_parser.py",
+    "alternative_modules": ["app/services/github_service.py"],
+    "key_symbols": ["CodeParser", "parse_python", "parse_file"],
+    "expected_answer": "The AST code parser and intelligent chunker is implemented in backend/app/services/code_parser.py."
+  },
+  "q5": {
+    "target_module": "app/services/pr_reviewer.py",
+    "alternative_modules": ["app/api/v1/pr.py"],
+    "key_symbols": ["PRReviewerService", "review_pr"],
+    "expected_answer": "The PR review agent is implemented in backend/app/services/pr_reviewer.py checking 8 dimensions."
+  },
+  "q6": {
+    "target_module": "app/services/agent_workflow.py",
+    "alternative_modules": ["app/api/v1/agents.py"],
+    "key_symbols": ["AgentWorkflowService", "approve_patch", "AWAITING_HUMAN_APPROVAL"],
+    "expected_answer": "Multi-agent workflow pauses in AWAITING_HUMAN_APPROVAL and requires approve_patch before committing changes."
+  },
+  "q7": {
+    "target_module": "app/services/job_manager.py",
+    "alternative_modules": ["worker/celery_app.py", "app/api/v1/jobs.py"],
+    "key_symbols": ["JobManager", "create_job", "get_job"],
+    "expected_answer": "Background jobs are managed in backend/app/services/job_manager.py and worker/celery_app.py."
+  },
+  "q8": {
+    "target_module": "app/core/telemetry.py",
+    "alternative_modules": ["app/api/v1/telemetry.py"],
+    "key_symbols": ["TelemetryCollector", "record", "get_metrics"],
+    "expected_answer": "AI observability telemetry is collected in backend/app/core/telemetry.py tracking request_id, latency, tokens, and cost."
+  }
+}

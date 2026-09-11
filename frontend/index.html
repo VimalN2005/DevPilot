@@ -1,0 +1,466 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevPilot — Production-Grade AI Engineering Platform</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-terminal"></i></div>
+      <span>DevPilot</span>
+      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 0.5rem;">AI Codebase Intelligence</span>
+    </div>
+    <div class="nav-badges">
+      <span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> System Healthy</span>
+      <span class="badge badge-purple" id="badge-model"><i class="fa-solid fa-microchip"></i> Gemini-2.5-Flash</span>
+      <span class="badge badge-blue" id="badge-rate-limit"><i class="fa-solid fa-gauge"></i> 100 req/min</span>
+      <select id="user-role-select" class="form-select" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--bg-card);">
+        <option value="DEVELOPER">Role: DEVELOPER</option>
+        <option value="ADMIN">Role: ADMIN</option>
+        <option value="VIEWER">Role: VIEWER</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <button class="nav-tab-btn active" data-tab="tab-dashboard">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-repos">
+        <i class="fa-solid fa-folder-tree"></i> Repository Studio
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-chat">
+        <i class="fa-solid fa-comments"></i> RAG Search & Chat
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-issues">
+        <i class="fa-solid fa-bug"></i> AI Issue Analyzer
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-pr">
+        <i class="fa-solid fa-code-pull-request"></i> PR Review Agent
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-agents">
+        <i class="fa-solid fa-sitemap"></i> Agentic Workflow
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-telemetry">
+        <i class="fa-solid fa-wave-square"></i> Observability
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-eval">
+        <i class="fa-solid fa-vial-circle-check"></i> AI Evaluation
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-settings">
+        <i class="fa-solid fa-sliders"></i> Settings & Keys
+      </button>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- 1. Dashboard Tab -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <div class="panel-header">
+          <h1 class="panel-title">Engineering Platform Overview</h1>
+          <p class="panel-desc">Autonomous codebase intelligence, streaming hybrid RAG, issue triage, and multi-agent workflows.</p>
+        </div>
+
+        <div class="grid-4" style="margin-bottom: 2rem;">
+          <div class="stat-card">
+            <div class="stat-label">Active Repositories</div>
+            <div class="stat-value" id="dash-repos-count">1</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Indexed AST Chunks</div>
+            <div class="stat-value" id="dash-chunks-count">74</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">AI RAG Accuracy</div>
+            <div class="stat-value" style="color: var(--accent-green);" id="dash-accuracy">96.0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg Query Latency</div>
+            <div class="stat-value" id="dash-avg-latency">0.14s</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span><i class="fa-solid fa-network-wired"></i> DevPilot System Architecture</span>
+            <span class="badge badge-blue">Production Pipeline</span>
+          </div>
+          <pre style="line-height: 1.35; font-size: 0.8rem; overflow-x: auto;">
+  ┌────────────────────────────────────────────────────────────────────────────────┐
+  │                           Frontend UI (FastAPI Static / Next.js)              │
+  └───────────────────────────────────────┬────────────────────────────────────────┘
+                                          │ HTTP / SSE Stream
+                                          ▼
+  ┌────────────────────────────────────────────────────────────────────────────────┐
+  │           FastAPI API Gateway  •  JWT Refresh Rotation  •  RBAC Engine        │
+  │                     100 req/min Sliding Window Rate Limiting                   │
+  └───────────────┬───────────────────────┬────────────────────────┬───────────────┘
+                  │                       │                        │
+                  ▼                       ▼                        ▼
+         ┌─────────────────┐    ┌─────────────────┐       ┌─────────────────┐
+         │ PostgreSQL DB   │    │  Redis Cache    │       │ Celery / Worker │
+         │  pgvector Chunks│    │  Job Store      │       │ Async Ingestion │
+         │  Users / Repos  │    │  Rate Limiter   │       │ Background Runs │
+         └────────┬────────┘    └─────────────────┘       └────────┬────────┘
+                  │                                                │
+                  └───────────────────────┬────────────────────────┘
+                                          ▼
+                                ┌───────────────────┐
+                                │    AI Pipeline    │
+                                │ • AST Chunker     │
+                                │ • Dense Embedding │
+                                │ • Hybrid Reranker │
+                                │ • LangGraph Agents│
+                                └─────────┬─────────┘
+                                          │
+                  ┌───────────────────────┼───────────────────────┐
+                  ▼                       ▼                       ▼
+            GitHub API             Vector Search              LLM Providers
+            Repositories           Cosine / pgvector          Gemini / OpenAI
+          </pre>
+        </div>
+      </section>
+
+      <!-- 2. Repository Studio Tab -->
+      <section id="tab-repos" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">Repository Intelligence Studio</h1>
+          <p class="panel-desc">Clone GitHub repositories or index local directories with AST-aware structural parsing.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Connect Repository</div>
+            <form id="connect-repo-form">
+              <div class="form-group">
+                <label class="form-label">Repository Name</label>
+                <input type="text" id="repo-name" class="form-input" value="devpilot" required placeholder="e.g. devpilot">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Clone URL (GitHub) or Local Path</label>
+                <input type="text" id="repo-url" class="form-input" placeholder="https://github.com/owner/repo or local directory">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Branch</label>
+                <input type="text" id="repo-branch" class="form-input" value="main">
+              </div>
+              <button type="submit" class="btn btn-primary" id="btn-index-repo">
+                <i class="fa-solid fa-cloud-arrow-down"></i> Ingest & Index Repository
+              </button>
+            </form>
+            <div id="repo-progress-container" style="display: none; margin-top: 1rem;">
+              <div style="font-size: 0.85rem; margin-bottom: 0.35rem;" id="repo-progress-text">Indexing files into pgvector...</div>
+              <div style="height: 6px; background: #1e293b; border-radius: 4px; overflow: hidden;">
+                <div id="repo-progress-bar" style="width: 25%; height: 100%; background: var(--primary); transition: width 0.3s;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Indexed Repositories</div>
+            <div id="repo-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="color: var(--text-muted); font-size: 0.9rem;">Loading connected repositories...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. RAG Search & Chat Tab -->
+      <section id="tab-chat" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">Streaming Codebase RAG</h1>
+          <p class="panel-desc">Real-time Server-Sent Events (SSE) stream with progressive reasoning and exact line citations.</p>
+        </div>
+
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-bubble chat-bubble-ai">
+              <strong>DevPilot AI:</strong> Welcome! Ask me anything about your connected codebase. For example:
+              <ul style="margin: 0.5rem 0 0 1.25rem; font-size: 0.88rem; color: #93c5fd;">
+                <li><em>"Where is authentication implemented?"</em></li>
+                <li><em>"How does rate limiting work?"</em></li>
+                <li><em>"Explain the multi-agent workflow architecture."</em></li>
+              </ul>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <input type="text" id="chat-query" class="form-input" placeholder="Ask about codebase architecture, functions, auth, or errors..." style="flex: 1;">
+            <button class="btn btn-primary" id="btn-chat-send">
+              <i class="fa-solid fa-paper-plane"></i> Ask AI
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. AI Issue Analyzer Tab -->
+      <section id="tab-issues" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">AI Issue Analyzer & Triage</h1>
+          <p class="panel-desc">Paste a GitHub bug report or issue to pinpoint affected files, root cause, and suggested tests.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Paste GitHub Issue</div>
+            <div class="form-group">
+              <label class="form-label">Issue Title</label>
+              <input type="text" id="issue-title" class="form-input" value="API returns 500 when refresh token expires">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Issue Description</label>
+              <textarea id="issue-desc" class="form-textarea" placeholder="Paste the issue body or error traceback...">When a user's refresh token reaches expiration, calling POST /api/v1/auth/refresh throws an unhandled jwt.ExpiredSignatureError resulting in HTTP 500 instead of a clean 401 Unauthorized.</textarea>
+            </div>
+            <button class="btn btn-primary" id="btn-analyze-issue">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Issue
+            </button>
+          </div>
+
+          <div class="card" id="issue-result-card">
+            <div class="card-title">
+              <span>Issue Triage Verdict</span>
+              <span class="badge badge-rose" id="issue-badge-severity">Severity: High</span>
+            </div>
+            <div id="issue-analysis-output">
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Click "Analyze Issue" to inspect root cause and generate patches.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. PR Review Agent Tab -->
+      <section id="tab-pr" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">PR Review Agent</h1>
+          <p class="panel-desc">Autonomous multi-dimensional audit across 8 dimensions including Security, SQL, and Error Handling.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Review Pull Request</div>
+            <div class="form-group">
+              <label class="form-label">PR Title</label>
+              <input type="text" id="pr-title" class="form-input" value="feat(auth): Add user logout endpoint">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Git Diff</label>
+              <textarea id="pr-diff" class="form-textarea" style="min-height: 200px;">
+diff --git a/backend/app/api/v1/auth.py b/backend/app/api/v1/auth.py
+--- a/backend/app/api/v1/auth.py
++++ b/backend/app/api/v1/auth.py
+@@ -85,4 +85,7 @@
++@router.post("/logout")
++def logout():
++    # Clear cookies on client side
++    session.clear()
++    return {"message": "Logged out successfully"}
+</textarea>
+            </div>
+            <button class="btn btn-primary" id="btn-review-pr">
+              <i class="fa-solid fa-magnifying-glass-chart"></i> Run PR Audit Agent
+            </button>
+          </div>
+
+          <div class="card" id="pr-result-card">
+            <div class="card-title">
+              <span>Audit Results</span>
+              <span class="badge badge-amber" id="pr-verdict-badge">PENDING REVIEW</span>
+            </div>
+            <div id="pr-audit-output">
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Run PR audit to inspect security vulnerabilities and code quality.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Agentic Workflow Studio Tab -->
+      <section id="tab-agents" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">Multi-Agent Workflow Studio</h1>
+          <p class="panel-desc">Collaborative 5-stage agent team with mandatory <strong>Human-in-the-Loop Approval Gate</strong>.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Launch Agentic Workflow</div>
+          <div class="form-group">
+            <label class="form-label">Issue or Objective</label>
+            <input type="text" id="agent-goal" class="form-input" value="Resolve HTTP 500 on expired refresh token and add regression tests">
+          </div>
+          <button class="btn btn-primary" id="btn-run-workflow">
+            <i class="fa-solid fa-play"></i> Execute Multi-Agent Pipeline
+          </button>
+        </div>
+
+        <div id="workflow-execution-area" style="display: none;">
+          <div class="card">
+            <div class="card-title">
+              <span>Agent State Machine</span>
+              <span class="badge badge-amber" id="workflow-status-badge">AWAITING HUMAN APPROVAL</span>
+            </div>
+            <div id="agent-steps-list"></div>
+            
+            <!-- Human Approval Gate Box -->
+            <div id="human-approval-gate" style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm);">
+              <div style="font-weight: 700; color: var(--accent-amber); margin-bottom: 0.5rem;">
+                <i class="fa-solid fa-shield-halved"></i> Human Approval Gate
+              </div>
+              <p style="font-size: 0.9rem; margin-bottom: 1rem;">The agents have analyzed the issue and formulated the surgical patch below. Agents will never modify code without explicit human consent.</p>
+              <pre id="workflow-proposed-patch" style="margin-bottom: 1rem; max-height: 200px;"></pre>
+              <button class="btn btn-accent" id="btn-approve-patch">
+                <i class="fa-solid fa-check-double"></i> Approve & Apply Patch to Repository
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Observability Tab -->
+      <section id="tab-telemetry" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">Production AI Observability</h1>
+          <p class="panel-desc">Real-time metrics, token consumption, cost calculation, and latency distributions.</p>
+        </div>
+
+        <div class="grid-4" style="margin-bottom: 2rem;">
+          <div class="stat-card">
+            <div class="stat-label">Total AI Requests</div>
+            <div class="stat-value" id="tele-requests">1,842</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Average Latency</div>
+            <div class="stat-value" id="tele-latency">1.82s</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Error Rate</div>
+            <div class="stat-value" style="color: var(--accent-green);" id="tele-error">1.4%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Estimated AI Cost</div>
+            <div class="stat-value" id="tele-cost">$8.42</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Recent Invocations Log Table</div>
+          <div style="overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Endpoint</th>
+                  <th>Model</th>
+                  <th>Tokens (In/Out)</th>
+                  <th>Latency</th>
+                  <th>Cost</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="telemetry-table-body">
+                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading telemetry logs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. AI Evaluation Tab -->
+      <section id="tab-eval" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">Production RAG Evaluation</h1>
+          <p class="panel-desc">Automated specify &rarr; measure &rarr; improve benchmarks for Faithfulness, Relevance, and Retrieval Recall.</p>
+        </div>
+
+        <div class="grid-4" style="margin-bottom: 2rem;">
+          <div class="stat-card">
+            <div class="stat-label">Faithfulness</div>
+            <div class="stat-value" style="color: var(--accent-green);" id="eval-faith">96.0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Answer Relevance</div>
+            <div class="stat-value" style="color: var(--accent-cyan);" id="eval-rel">94.0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Retrieval Recall</div>
+            <div class="stat-value" style="color: var(--primary);" id="eval-recall">100.0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg Benchmark Latency</div>
+            <div class="stat-value" id="eval-lat">0.14s</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Ground-Truth Benchmark Runs</span>
+            <button class="btn btn-primary" id="btn-run-eval" style="padding: 0.4rem 0.9rem; font-size: 0.82rem;">
+              <i class="fa-solid fa-play"></i> Re-Run Benchmark Suite
+            </button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Query</th>
+                  <th>Expected Module</th>
+                  <th>Retrieved Module</th>
+                  <th>Recall</th>
+                  <th>Faithfulness</th>
+                  <th>Latency</th>
+                </tr>
+              </thead>
+              <tbody id="eval-table-body">
+                <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading evaluation benchmarks...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Settings Tab -->
+      <section id="tab-settings" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">Platform Settings & API Keys</h1>
+          <p class="panel-desc">Configure LLM providers, database connection, and API credentials.</p>
+        </div>
+
+        <div class="card" style="max-width: 600px;">
+          <div class="card-title">LLM Provider Configuration</div>
+          <div class="form-group">
+            <label class="form-label">Provider</label>
+            <select id="cfg-provider" class="form-select">
+              <option value="gemini">Google Gemini (Gemini 2.5 Flash / 1.5 Flash)</option>
+              <option value="openai">OpenAI (GPT-4o Mini / GPT-4o)</option>
+              <option value="ollama">Local Ollama / vLLM (OpenAI-compatible)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Google Gemini API Key</label>
+            <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIzaSy...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">OpenAI API Key</label>
+            <input type="password" id="cfg-openai-key" class="form-input" placeholder="sk-...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">GitHub Access Token</label>
+            <input type="password" id="cfg-github-token" class="form-input" placeholder="ghp_...">
+          </div>
+          <button class="btn btn-primary" id="btn-save-settings">
+            <i class="fa-solid fa-floppy-disk"></i> Save Settings
+          </button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

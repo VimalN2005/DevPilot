@@ -1,0 +1,42 @@
+﻿[
+  {
+    "id": "q1",
+    "question": "Where is JWT authentication and token creation implemented?",
+    "category": "Authentication"
+  },
+  {
+    "id": "q2",
+    "question": "Where is role-based access control (RBAC) with ADMIN and DEVELOPER roles enforced?",
+    "category": "Security"
+  },
+  {
+    "id": "q3",
+    "question": "How is the 100 requests per minute sliding window rate limiter implemented?",
+    "category": "Infrastructure"
+  },
+  {
+    "id": "q4",
+    "question": "Where is the AST code parser and intelligent language-aware chunker located?",
+    "category": "Code Intelligence"
+  },
+  {
+    "id": "q5",
+    "question": "Where is the PR review agent that audits code across 8 dimensions located?",
+    "category": "Automation"
+  },
+  {
+    "id": "q6",
+    "question": "How does the multi-agent workflow enforce human-in-the-loop patch approval?",
+    "category": "Agentic Workflow"
+  },
+  {
+    "id": "q7",
+    "question": "Where are background jobs and async worker queues managed?",
+    "category": "Workers"
+  },
+  {
+    "id": "q8",
+    "question": "How are latency, token usage, and cost collected for AI observability?",
+    "category": "Observability"
+  }
+]
