@@ -1,4 +1,4 @@
-﻿import os
+import os
 from pathlib import Path
 from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -52,6 +52,9 @@ class Settings(BaseSettings):
 
     # GitHub Integration
     GITHUB_TOKEN: Optional[str] = None
+    GITHUB_WEBHOOK_SECRET: Optional[str] = "devpilot_webhook_secret"
+    GITHUB_BOT_NAME: str = "DevPilot[bot]"
+    GITHUB_ADMIN_USER: str = "VimalN2005"
 
     # Storage paths
     BASE_DIR: Path = BASE_DIR

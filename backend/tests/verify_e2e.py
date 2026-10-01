@@ -116,6 +116,21 @@ faith = eval_res["faithfulness"]
 rel = eval_res["answer_relevance"]
 print(f"[PASS] RAG Eval: Recall={rec}%, Faithfulness={faith}%, Relevance={rel}%")
 
-print("\n========================================")
-print("  ALL 9 ENDPOINTS PASSED VERIFICATION!  ")
-print("========================================")
+print("\n=== 10. Testing GitHub Bot & Webhooks ===")
+r = client.post("/api/v1/github/simulate", json={
+    "event_type": "pull_request",
+    "repo_name": "DevPilot",
+    "owner": "VimalN2005",
+    "number": 142,
+    "title": "feat: add user logout",
+    "diff_text": "diff --git a/auth.py b/auth.py\n+def logout(): session.clear()"
+})
+assert r.status_code == 200
+bot_res = r.json()
+assert bot_res["event"] == "pull_request"
+assert "DevPilot Autonomous PR Review" in bot_res["comment"]
+print(f"[PASS] GitHub Bot: PR #{bot_res['pr_number']} reviewed, Score: {bot_res['score']}/100, Verdict: {bot_res['verdict']}")
+
+print("\n==========================================")
+print("  ALL 10 ENDPOINTS PASSED VERIFICATION!   ")
+print("==========================================")

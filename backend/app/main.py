@@ -1,4 +1,4 @@
-﻿import time
+import time
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -10,10 +10,12 @@ from app.api.v1.agents import router as agents_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.chat import router as chat_router
 from app.api.v1.eval import router as eval_router
+from app.api.v1.github_bot import router as github_bot_router
 from app.api.v1.issues import router as issues_router
 from app.api.v1.jobs import router as jobs_router
 from app.api.v1.pr import router as pr_router
 from app.api.v1.repos import router as repos_router
+from app.api.v1.settings import router as settings_router
 from app.api.v1.telemetry import router as telemetry_router
 from app.config import settings
 from app.core.rate_limiter import check_rate_limit
@@ -82,6 +84,8 @@ app.include_router(agents_router, prefix="/api/v1")
 app.include_router(jobs_router, prefix="/api/v1")
 app.include_router(telemetry_router, prefix="/api/v1")
 app.include_router(eval_router, prefix="/api/v1")
+app.include_router(settings_router, prefix="/api/v1")
+app.include_router(github_bot_router, prefix="/api/v1")
 
 
 # Serve Frontend Static Assets

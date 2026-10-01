@@ -1,7 +1,8 @@
-﻿import asyncio
+import asyncio
 import json
 import time
 from typing import AsyncGenerator, Dict, List, Optional
+import httpx
 from app.config import settings
 from app.core.telemetry import telemetry_collector
 
@@ -9,9 +10,9 @@ from app.core.telemetry import telemetry_collector
 class LLMService:
     """Unified LLM interface supporting Gemini, OpenAI, Ollama, and offline simulation."""
 
-    def __init__(self):
-        self._openai_client = None
-        self._gemini_client = None
+    def is_configured(self) -> bool:
+        """Return True if at least one live LLM provider has an API key configured."""
+        return bool(settings.GEMINI_API_KEY or settings.OPENAI_API_KEY)
 
     async def generate_response(
         self,
@@ -39,65 +40,115 @@ class LLMService:
         # 1. Try Gemini
         if settings.GEMINI_API_KEY:
             try:
-                from google import genai
-                client = genai.Client(api_key=settings.GEMINI_API_KEY)
-                resp = client.models.generate_content(
-                    model=chosen_model if "gemini" in chosen_model else "gemini-2.5-flash",
-                    contents=full_prompt
-                )
-                output_text = resp.text or ""
-                latency = (time.time() - start_time) * 1000.0
-                tokens_in = len(full_prompt.split()) * 2
-                tokens_out = len(output_text.split()) * 2
-                telemetry_collector.record(
-                    endpoint=endpoint,
-                    model=chosen_model,
-                    tokens_input=tokens_in,
-                    tokens_output=tokens_out,
-                    latency_ms=latency,
-                    retrieved_chunks=chunks_count,
-                    success=True,
-                    user_id=user_id
-                )
-                return output_text
-            except Exception as e:
+                g_model = chosen_model if "gemini" in chosen_model else "gemini-2.5-flash"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_model}:generateContent?key={settings.GEMINI_API_KEY}"
+                payload = {
+                    "contents": [{"parts": [{"text": full_prompt}]}],
+                    "generationConfig": {"temperature": 0.2, "maxOutputTokens": 2048}
+                }
+                async with httpx.AsyncClient(timeout=25.0) as client:
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        candidates = data.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts:
+                                output_text = parts[0].get("text", "")
+                                latency = (time.time() - start_time) * 1000.0
+                                tokens_in = len(full_prompt.split()) * 2
+                                tokens_out = len(output_text.split()) * 2
+                                telemetry_collector.record(
+                                    endpoint=endpoint,
+                                    model=g_model,
+                                    tokens_input=tokens_in,
+                                    tokens_output=tokens_out,
+                                    latency_ms=latency,
+                                    retrieved_chunks=chunks_count,
+                                    success=True,
+                                    user_id=user_id
+                                )
+                                return output_text
+            except Exception:
                 pass
 
         # 2. Try OpenAI
         if settings.OPENAI_API_KEY:
             try:
-                import openai
-                client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-                resp = await client.chat.completions.create(
-                    model=chosen_model if "gpt" in chosen_model else "gpt-4o-mini",
-                    messages=[
+                o_model = chosen_model if "gpt" in chosen_model else "gpt-4o-mini"
+                url = "https://api.openai.com/v1/chat/completions"
+                payload = {
+                    "model": o_model,
+                    "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"{context_text}\n\n{user_prompt}"}
                     ],
-                    temperature=0.2
-                )
-                output_text = resp.choices[0].message.content or ""
-                latency = (time.time() - start_time) * 1000.0
-                usage = resp.usage
-                tokens_in = usage.prompt_tokens if usage else len(full_prompt.split()) * 2
-                tokens_out = usage.completion_tokens if usage else len(output_text.split()) * 2
-                telemetry_collector.record(
-                    endpoint=endpoint,
-                    model=chosen_model,
-                    tokens_input=tokens_in,
-                    tokens_output=tokens_out,
-                    latency_ms=latency,
-                    retrieved_chunks=chunks_count,
-                    success=True,
-                    user_id=user_id
-                )
-                return output_text
-            except Exception as e:
+                    "temperature": 0.2
+                }
+                async with httpx.AsyncClient(timeout=25.0) as client:
+                    resp = await client.post(
+                        url,
+                        headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
+                        json=payload
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        output_text = data["choices"][0]["message"]["content"]
+                        latency = (time.time() - start_time) * 1000.0
+                        usage = data.get("usage", {})
+                        tokens_in = usage.get("prompt_tokens", len(full_prompt.split()) * 2)
+                        tokens_out = usage.get("completion_tokens", len(output_text.split()) * 2)
+                        telemetry_collector.record(
+                            endpoint=endpoint,
+                            model=o_model,
+                            tokens_input=tokens_in,
+                            tokens_output=tokens_out,
+                            latency_ms=latency,
+                            retrieved_chunks=chunks_count,
+                            success=True,
+                            user_id=user_id
+                        )
+                        return output_text
+            except Exception:
                 pass
 
-        # 3. High-fidelity Offline Simulation Engine
+        # 3. Try Local Ollama
+        if settings.DEFAULT_LLM_PROVIDER == "ollama":
+            try:
+                base_url = settings.OLLAMA_BASE_URL.rstrip("/")
+                url = f"{base_url}/chat/completions"
+                payload = {
+                    "model": chosen_model if not chosen_model.startswith("gemini") else "llama3",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": f"{context_text}\n\n{user_prompt}"}
+                    ]
+                }
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        output_text = data["choices"][0]["message"]["content"]
+                        latency = (time.time() - start_time) * 1000.0
+                        tokens_in = len(full_prompt.split()) * 2
+                        tokens_out = len(output_text.split()) * 2
+                        telemetry_collector.record(
+                            endpoint=endpoint,
+                            model="ollama-local",
+                            tokens_input=tokens_in,
+                            tokens_output=tokens_out,
+                            latency_ms=latency,
+                            retrieved_chunks=chunks_count,
+                            success=True,
+                            user_id=user_id
+                        )
+                        return output_text
+            except Exception:
+                pass
+
+        # 4. High-fidelity Offline Simulation Engine
         output_text = self._synthesize_offline_response(user_prompt, context_chunks)
-        latency = (time.time() - start_time) * 1000.0 + 350.0  # simulate realistic LLM latency
+        latency = (time.time() - start_time) * 1000.0 + 280.0
         tokens_in = len(full_prompt.split()) * 2
         tokens_out = len(output_text.split()) * 2
         telemetry_collector.record(
@@ -130,22 +181,107 @@ class LLMService:
         start_time = time.time()
 
         yield {"type": "status", "message": "Analyzing repository structure..."}
-        await asyncio.sleep(0.15)
+        await asyncio.sleep(0.1)
 
         yield {"type": "status", "message": f"Retrieved {len(context_chunks)} relevant code modules via hybrid search..."}
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.12)
 
         yield {"type": "status", "message": "Synthesizing architectural analysis..."}
-        await asyncio.sleep(0.15)
+        await asyncio.sleep(0.1)
 
-        full_answer = self._synthesize_offline_response(query, context_chunks)
+        context_text = ""
+        if context_chunks:
+            context_text = "\n\n### RETRIEVED CODEBASE CONTEXT:\n"
+            for c in context_chunks:
+                context_text += f"\n--- File: {c.get('file_path')} (Lines {c.get('start_line')}-{c.get('end_line')}) ---\n"
+                context_text += c.get("content", "")
 
-        # Stream tokens
-        words = full_answer.split(" ")
-        for i, word in enumerate(words):
-            yield {"type": "token", "content": word + (" " if i < len(words) - 1 else "")}
-            if i % 4 == 0:
-                await asyncio.sleep(0.02)
+        full_prompt = (
+            "You are DevPilot, an expert AI software architect and developer partner. "
+            "Analyze the codebase query accurately using the provided code context. "
+            "Cite files, functions, and line ranges where applicable. Format nicely in markdown.\n\n"
+            f"{context_text}\n\nUser Question: {query}"
+        )
+
+        tokens_streamed = 0
+        used_live_llm = False
+        live_model_name = settings.DEFAULT_MODEL
+
+        # Attempt 1: Real-time Gemini Stream if configured
+        if settings.GEMINI_API_KEY:
+            try:
+                g_model = settings.DEFAULT_MODEL if "gemini" in settings.DEFAULT_MODEL else "gemini-2.5-flash"
+                live_model_name = g_model
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_model}:streamGenerateContent?alt=sse&key={settings.GEMINI_API_KEY}"
+                payload = {
+                    "contents": [{"parts": [{"text": full_prompt}]}],
+                    "generationConfig": {"temperature": 0.2, "maxOutputTokens": 2048}
+                }
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    async with client.stream("POST", url, json=payload) as stream_resp:
+                        if stream_resp.status_code == 200:
+                            async for line in stream_resp.aiter_lines():
+                                if line.startswith("data: "):
+                                    chunk_json = line[6:].strip()
+                                    if chunk_json:
+                                        try:
+                                            data = json.loads(chunk_json)
+                                            parts = data.get("candidates", [])[0].get("content", {}).get("parts", [])
+                                            for p in parts:
+                                                text_piece = p.get("text", "")
+                                                if text_piece:
+                                                    yield {"type": "token", "content": text_piece}
+                                                    tokens_streamed += len(text_piece.split())
+                                                    used_live_llm = True
+                                        except Exception:
+                                            pass
+            except Exception:
+                used_live_llm = False
+
+        # Attempt 2: Real-time OpenAI Stream if configured
+        if not used_live_llm and settings.OPENAI_API_KEY:
+            try:
+                o_model = settings.DEFAULT_MODEL if "gpt" in settings.DEFAULT_MODEL else "gpt-4o-mini"
+                live_model_name = o_model
+                url = "https://api.openai.com/v1/chat/completions"
+                payload = {
+                    "model": o_model,
+                    "messages": [
+                        {"role": "system", "content": "You are DevPilot, an expert AI software architect and developer partner. Use the code context to answer thoroughly."},
+                        {"role": "user", "content": f"{context_text}\n\n{query}"}
+                    ],
+                    "stream": True,
+                    "temperature": 0.2
+                }
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    async with client.stream("POST", url, headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"}, json=payload) as stream_resp:
+                        if stream_resp.status_code == 200:
+                            async for line in stream_resp.aiter_lines():
+                                if line.startswith("data: "):
+                                    chunk_str = line[6:].strip()
+                                    if chunk_str == "[DONE]":
+                                        break
+                                    try:
+                                        data = json.loads(chunk_str)
+                                        delta_text = data.get("choices", [])[0].get("delta", {}).get("content", "")
+                                        if delta_text:
+                                            yield {"type": "token", "content": delta_text}
+                                            tokens_streamed += len(delta_text.split())
+                                            used_live_llm = True
+                                    except Exception:
+                                        pass
+            except Exception:
+                used_live_llm = False
+
+        # Fallback to high-fidelity offline synthesis if live LLM did not yield tokens
+        if not used_live_llm or tokens_streamed == 0:
+            full_answer = self._synthesize_offline_response(query, context_chunks)
+            words = full_answer.split(" ")
+            tokens_streamed = len(words)
+            for i, word in enumerate(words):
+                yield {"type": "token", "content": word + (" " if i < len(words) - 1 else "")}
+                if i % 3 == 0:
+                    await asyncio.sleep(0.015)
 
         # Send source file citations
         sources = [
@@ -162,10 +298,10 @@ class LLMService:
 
         latency = (time.time() - start_time) * 1000.0
         tokens_in = len(query.split()) * 3 + (len(context_chunks) * 120)
-        tokens_out = len(words) * 2
+        tokens_out = max(tokens_streamed * 2, 20)
         telemetry_collector.record(
             endpoint="/api/v1/chat/stream",
-            model="gemini-2.5-flash",
+            model=live_model_name if used_live_llm else "gemini-2.5-flash-simulator",
             tokens_input=tokens_in,
             tokens_output=tokens_out,
             latency_ms=latency,
@@ -180,7 +316,8 @@ class LLMService:
                 "latency_ms": round(latency, 2),
                 "tokens_input": tokens_in,
                 "tokens_output": tokens_out,
-                "chunks_evaluated": len(context_chunks)
+                "chunks_evaluated": len(context_chunks),
+                "live_llm": used_live_llm
             }
         }
 

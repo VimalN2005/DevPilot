@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   let activeRepoId = null;
   let currentWorkflowId = null;
 
@@ -19,6 +19,8 @@
       if (btn.getAttribute("data-tab") === "tab-telemetry") loadTelemetry();
       if (btn.getAttribute("data-tab") === "tab-eval") loadEvaluation();
       if (btn.getAttribute("data-tab") === "tab-repos") loadRepos();
+      if (btn.getAttribute("data-tab") === "tab-bot") loadBotEvents();
+      if (btn.getAttribute("data-tab") === "tab-settings") loadSettings();
     });
   });
 
@@ -464,6 +466,257 @@
     });
   }
 
+  // 10. Settings Management
+  async function loadSettings() {
+    try {
+      const res = await fetch("/api/v1/settings");
+      const data = await res.json();
+
+      const provSelect = document.getElementById("cfg-provider");
+      const modelInput = document.getElementById("cfg-model");
+      if (provSelect && data.provider) provSelect.value = data.provider;
+      if (modelInput && data.model) modelInput.value = data.model;
+
+      const badgeModel = document.getElementById("badge-model");
+      if (badgeModel && data.model) {
+        badgeModel.innerHTML = `<i class="fa-solid fa-microchip"></i> ${data.model}`;
+      }
+
+      // Update key status badges
+      const gBadge = document.getElementById("status-gemini-key");
+      if (gBadge) {
+        gBadge.textContent = data.has_gemini_key ? `Configured (${data.gemini_key_masked})` : "Not Configured";
+        gBadge.className = `badge ${data.has_gemini_key ? "badge-green" : "badge-amber"}`;
+      }
+
+      const oBadge = document.getElementById("status-openai-key");
+      if (oBadge) {
+        oBadge.textContent = data.has_openai_key ? `Configured (${data.openai_key_masked})` : "Not Configured";
+        oBadge.className = `badge ${data.has_openai_key ? "badge-green" : "badge-amber"}`;
+      }
+
+      const ghBadge = document.getElementById("status-github-token");
+      if (ghBadge) {
+        ghBadge.textContent = data.has_github_token ? `Configured (${data.github_token_masked})` : "Not Configured";
+        ghBadge.className = `badge ${data.has_github_token ? "badge-green" : "badge-amber"}`;
+      }
+
+      const sysDb = document.getElementById("sys-db-type");
+      if (sysDb && data.database_type) sysDb.textContent = data.database_type;
+
+      const sysEnv = document.getElementById("sys-env");
+      if (sysEnv && data.environment) sysEnv.textContent = data.environment;
+    } catch (e) {
+      console.error("Error loading settings:", e);
+    }
+  }
+
+  const btnSaveSettings = document.getElementById("btn-save-settings");
+  if (btnSaveSettings) {
+    btnSaveSettings.addEventListener("click", async () => {
+      const provider = document.getElementById("cfg-provider").value;
+      const model = document.getElementById("cfg-model").value;
+      const gemini_key = document.getElementById("cfg-gemini-key").value;
+      const openai_key = document.getElementById("cfg-openai-key").value;
+      const github_token = document.getElementById("cfg-github-token").value;
+      const msgBox = document.getElementById("settings-status-msg");
+
+      btnSaveSettings.disabled = true;
+      btnSaveSettings.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Saving...";
+
+      const payload = { provider, model };
+      if (gemini_key.trim()) payload.gemini_api_key = gemini_key.trim();
+      if (openai_key.trim()) payload.openai_api_key = openai_key.trim();
+      if (github_token.trim()) payload.github_token = github_token.trim();
+
+      try {
+        const res = await fetch("/api/v1/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        msgBox.style.display = "block";
+        msgBox.style.color = "var(--accent-green)";
+        msgBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${data.message} Active Model: <strong>${data.model}</strong>`;
+
+        // Clear password inputs
+        document.getElementById("cfg-gemini-key").value = "";
+        document.getElementById("cfg-openai-key").value = "";
+        document.getElementById("cfg-github-token").value = "";
+
+        await loadSettings();
+        setTimeout(() => { msgBox.style.display = "none"; }, 4000);
+      } catch (err) {
+        msgBox.style.display = "block";
+        msgBox.style.color = "var(--accent-rose)";
+        msgBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Failed to save settings: ${err.message}`;
+      } finally {
+        btnSaveSettings.disabled = false;
+        btnSaveSettings.innerHTML = "<i class='fa-solid fa-floppy-disk'></i> Save Settings";
+      }
+    });
+  }
+
+  const btnTestConn = document.getElementById("btn-test-connection");
+  if (btnTestConn) {
+    btnTestConn.addEventListener("click", async () => {
+      const provider = document.getElementById("cfg-provider").value;
+      const model = document.getElementById("cfg-model").value;
+      const gemini_key = document.getElementById("cfg-gemini-key").value;
+      const openai_key = document.getElementById("cfg-openai-key").value;
+      const msgBox = document.getElementById("settings-status-msg");
+
+      btnTestConn.disabled = true;
+      btnTestConn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Testing...";
+      msgBox.style.display = "block";
+      msgBox.style.color = "var(--text-muted)";
+      msgBox.innerHTML = "Pinging AI provider endpoint...";
+
+      try {
+        const res = await fetch("/api/v1/settings/test-connection", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider,
+            model,
+            api_key: provider === "gemini" ? (gemini_key.trim() || undefined) : (openai_key.trim() || undefined)
+          })
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          msgBox.style.color = "var(--accent-green)";
+          msgBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${data.message}`;
+        } else {
+          msgBox.style.color = "var(--accent-amber)";
+          msgBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${data.message}`;
+        }
+      } catch (err) {
+        msgBox.style.color = "var(--accent-rose)";
+        msgBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Connection error: ${err.message}`;
+      } finally {
+        btnTestConn.disabled = false;
+        btnTestConn.innerHTML = "<i class='fa-solid fa-plug-circle-check'></i> Test Connection";
+      }
+    });
+  }
+
+  // 11. GitHub Bot & Webhook Studio
+  async function loadBotEvents() {
+    try {
+      const res = await fetch("/api/v1/github/events");
+      const data = await res.json();
+      const tbody = document.getElementById("bot-events-table-body");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+      if (!data.events || data.events.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='6' style='text-align: center; color: var(--text-muted);'>No webhook events received yet. Dispatch a simulated event above!</td></tr>";
+        return;
+      }
+
+      data.events.forEach(evt => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td style="font-family: monospace; font-size: 0.8rem;">${evt.id}</td>
+          <td><span class="badge ${evt.type === 'pull_request' ? 'badge-purple' : (evt.type === 'issues' ? 'badge-amber' : 'badge-blue')}">${evt.type}.${evt.action}</span></td>
+          <td>${evt.repository}</td>
+          <td style="font-family: monospace;">#${evt.number}</td>
+          <td style="font-weight: 500;">${evt.title}</td>
+          <td><span class="badge ${evt.post_status === 'success' || evt.post_status === 'simulated' ? 'badge-green' : 'badge-rose'}">${(evt.post_status || 'DELIVERED').toUpperCase()}</span></td>
+        `;
+        row.style.cursor = "pointer";
+        row.onclick = () => {
+          const preview = document.getElementById("bot-comment-preview");
+          if (preview && evt.comment_markdown) {
+            preview.textContent = evt.comment_markdown;
+          }
+        };
+        tbody.appendChild(row);
+      });
+    } catch (e) {
+      console.error("Error loading bot events:", e);
+    }
+  }
+
+  const botEventType = document.getElementById("bot-event-type");
+  if (botEventType) {
+    botEventType.addEventListener("change", () => {
+      const t = botEventType.value;
+      const titleInput = document.getElementById("bot-event-title");
+      const bodyInput = document.getElementById("bot-event-body");
+
+      if (t === "pull_request") {
+        titleInput.value = "feat(auth): add user logout endpoint and token revoke";
+        bodyInput.value = "diff --git a/backend/app/auth.py b/backend/app/auth.py\n@@ -10,4 +10,6 @@\n+def logout():\n+    # Token not revoked in DB\n+    session.clear()\n+    return {'message': 'Logged out'}";
+      } else if (t === "issues") {
+        titleInput.value = "API returns 500 when refresh token expires";
+        bodyInput.value = "When a user's refresh token reaches expiration, calling POST /api/v1/auth/refresh throws an unhandled jwt.ExpiredSignatureError resulting in HTTP 500 instead of a clean 401 Unauthorized.";
+      } else if (t === "issue_comment") {
+        titleInput.value = "Slash Command on PR #142";
+        bodyInput.value = "/devpilot review";
+      }
+    });
+  }
+
+  const btnSimulate = document.getElementById("btn-simulate-webhook");
+  if (btnSimulate) {
+    btnSimulate.addEventListener("click", async () => {
+      const event_type = document.getElementById("bot-event-type").value;
+      const repo_name = document.getElementById("bot-repo-name").value;
+      const number = parseInt(document.getElementById("bot-pr-num").value) || 142;
+      const title = document.getElementById("bot-event-title").value;
+      const bodyOrDiff = document.getElementById("bot-event-body").value;
+      const preview = document.getElementById("bot-comment-preview");
+      const badge = document.getElementById("bot-status-badge");
+
+      btnSimulate.disabled = true;
+      btnSimulate.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Processing Webhook...";
+      badge.textContent = "Analyzing & Generating...";
+      badge.className = "badge badge-purple";
+
+      try {
+        const payload = {
+          event_type,
+          repo_name,
+          number,
+          title
+        };
+        if (event_type === "pull_request") payload.diff_text = bodyOrDiff;
+        else if (event_type === "issues") payload.body = bodyOrDiff;
+        else if (event_type === "issue_comment") payload.command = bodyOrDiff;
+
+        const res = await fetch("/api/v1/github/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        badge.textContent = "Delivered & Commented";
+        badge.className = "badge badge-green";
+
+        const commentText = data.comment || data.response || JSON.stringify(data, null, 2);
+        preview.textContent = commentText;
+
+        await loadBotEvents();
+      } catch (err) {
+        badge.textContent = "Error";
+        badge.className = "badge badge-rose";
+        preview.textContent = "Webhook error: " + err.message;
+      } finally {
+        btnSimulate.disabled = false;
+        btnSimulate.innerHTML = "<i class='fa-solid fa-paper-plane'></i> Dispatch Webhook Event";
+      }
+    });
+  }
+
+  const btnRefreshBot = document.getElementById("btn-refresh-bot-events");
+  if (btnRefreshBot) {
+    btnRefreshBot.addEventListener("click", loadBotEvents);
+  }
+
   // Initial Boot
   loadRepos();
+  loadSettings();
 });

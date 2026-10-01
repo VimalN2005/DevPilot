@@ -7,14 +7,24 @@ from app.db.models import Base, User
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
+def _get_effective_db_url() -> str:
+    url = settings.DATABASE_URL
+    if url.startswith("sqlite+aiosqlite:///./"):
+        rel_name = url.replace("sqlite+aiosqlite:///./", "")
+        db_path = settings.BASE_DIR / rel_name
+        return f"sqlite+aiosqlite:///{db_path.as_posix()}"
+    return url
+
+effective_db_url = _get_effective_db_url()
+
 # Ensure database directory exists
-if settings.DATABASE_URL.startswith("sqlite"):
+if effective_db_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False, "timeout": 30.0}
 else:
     connect_args = {}
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    effective_db_url,
     echo=False,
     connect_args=connect_args,
     future=True

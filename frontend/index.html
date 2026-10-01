@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -53,6 +53,9 @@
       </button>
       <button class="nav-tab-btn" data-tab="tab-eval">
         <i class="fa-solid fa-vial-circle-check"></i> AI Evaluation
+      </button>
+      <button class="nav-tab-btn" data-tab="tab-bot">
+        <i class="fa-brands fa-github"></i> GitHub Bot & Webhooks
       </button>
       <button class="nav-tab-btn" data-tab="tab-settings">
         <i class="fa-solid fa-sliders"></i> Settings & Keys
@@ -427,34 +430,167 @@ diff --git a/backend/app/api/v1/auth.py b/backend/app/api/v1/auth.py
       <section id="tab-settings" class="tab-pane">
         <div class="panel-header">
           <h1 class="panel-title">Platform Settings & API Keys</h1>
-          <p class="panel-desc">Configure LLM providers, database connection, and API credentials.</p>
+          <p class="panel-desc">Configure LLM providers, active models, database connections, and API credentials.</p>
         </div>
 
-        <div class="card" style="max-width: 600px;">
-          <div class="card-title">LLM Provider Configuration</div>
-          <div class="form-group">
-            <label class="form-label">Provider</label>
-            <select id="cfg-provider" class="form-select">
-              <option value="gemini">Google Gemini (Gemini 2.5 Flash / 1.5 Flash)</option>
-              <option value="openai">OpenAI (GPT-4o Mini / GPT-4o)</option>
-              <option value="ollama">Local Ollama / vLLM (OpenAI-compatible)</option>
-            </select>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">LLM Provider Configuration</div>
+            <div class="form-group">
+              <label class="form-label">Provider</label>
+              <select id="cfg-provider" class="form-select">
+                <option value="gemini">Google Gemini (Gemini 2.5 Flash / 1.5 Flash)</option>
+                <option value="openai">OpenAI (GPT-4o Mini / GPT-4o)</option>
+                <option value="ollama">Local Ollama / vLLM (OpenAI-compatible)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Active Model</label>
+              <input type="text" id="cfg-model" class="form-input" placeholder="gemini-2.5-flash or gpt-4o-mini" value="gemini-2.5-flash">
+            </div>
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <label class="form-label" style="margin-bottom: 0;">Google Gemini API Key</label>
+                <span id="status-gemini-key" class="badge badge-amber" style="font-size: 0.72rem;">Checking...</span>
+              </div>
+              <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIzaSy... (leave blank to keep existing)">
+            </div>
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <label class="form-label" style="margin-bottom: 0;">OpenAI API Key</label>
+                <span id="status-openai-key" class="badge badge-amber" style="font-size: 0.72rem;">Checking...</span>
+              </div>
+              <input type="password" id="cfg-openai-key" class="form-input" placeholder="sk-... (leave blank to keep existing)">
+            </div>
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <label class="form-label" style="margin-bottom: 0;">GitHub Access Token</label>
+                <span id="status-github-token" class="badge badge-amber" style="font-size: 0.72rem;">Checking...</span>
+              </div>
+              <input type="password" id="cfg-github-token" class="form-input" placeholder="ghp_... (for private repos)">
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
+              <button class="btn btn-primary" id="btn-save-settings">
+                <i class="fa-solid fa-floppy-disk"></i> Save Settings
+              </button>
+              <button class="btn" id="btn-test-connection" style="background: var(--bg-card-hover); border: 1px solid var(--border-color); color: var(--text-main);">
+                <i class="fa-solid fa-plug-circle-check"></i> Test Connection
+              </button>
+            </div>
+            <div id="settings-status-msg" style="margin-top: 1rem; font-size: 0.88rem; display: none;"></div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Google Gemini API Key</label>
-            <input type="password" id="cfg-gemini-key" class="form-input" placeholder="AIzaSy...">
+
+          <div class="card">
+            <div class="card-title">System Runtime Status</div>
+            <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.88rem;">
+              <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                <span style="color: var(--text-muted);">Database Engine:</span>
+                <span id="sys-db-type" style="font-family: monospace; color: #93c5fd;">SQLite 3 (WAL mode)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                <span style="color: var(--text-muted);">Execution Environment:</span>
+                <span id="sys-env" class="badge badge-green">development</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                <span style="color: var(--text-muted);">Global API Rate Limit:</span>
+                <span style="font-family: monospace;">100 requests/minute</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                <span style="color: var(--text-muted);">Offline Simulation Mode:</span>
+                <span class="badge badge-blue">Ready & Active</span>
+              </div>
+              <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 6px; padding: 0.85rem; margin-top: 0.5rem;">
+                <div style="font-weight: 600; color: #93c5fd; margin-bottom: 0.35rem;"><i class="fa-solid fa-circle-info"></i> Zero-Config Guarantee</div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin: 0;">DevPilot works instantly out-of-the-box using deterministic semantic vector hashing. Adding an API key enables live LLM inference with Gemini 2.5 Flash or GPT-4o Mini.</p>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">OpenAI API Key</label>
-            <input type="password" id="cfg-openai-key" class="form-input" placeholder="sk-...">
+        </div>
+      <!-- 10. GitHub Bot & Webhooks Studio Tab -->
+      <section id="tab-bot" class="tab-pane">
+        <div class="panel-header">
+          <h1 class="panel-title">GitHub Bot & Webhook Studio</h1>
+          <p class="panel-desc">Autonomous GitHub App for real-time PR review comments, issue triage, and slash-command automation.</p>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 2rem;">
+          <!-- Left: Webhook Simulator -->
+          <div class="card">
+            <div class="card-title">
+              <span><i class="fa-solid fa-satellite-dish"></i> Webhook Event Simulator</span>
+              <span class="badge badge-purple">HMAC-SHA256 Ready</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Event Type</label>
+              <select id="bot-event-type" class="form-select">
+                <option value="pull_request">pull_request.opened (8-Dimension Code Review)</option>
+                <option value="issues">issues.opened (Automated Root-Cause Triage)</option>
+                <option value="issue_comment">issue_comment (/devpilot review command)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Repository & Number</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="bot-repo-name" class="form-input" value="DevPilot" style="flex: 2;" placeholder="Repository name">
+                <input type="number" id="bot-pr-num" class="form-input" value="142" style="flex: 1;" placeholder="PR #">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input type="text" id="bot-event-title" class="form-input" value="feat(auth): add user logout endpoint and token revoke">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Diff or Issue Body / Slash Command</label>
+              <textarea id="bot-event-body" class="form-textarea" style="min-height: 140px; font-family: monospace; font-size: 0.8rem;">diff --git a/backend/app/auth.py b/backend/app/auth.py
+@@ -10,4 +10,6 @@
++def logout():
++    # Token not revoked in DB
++    session.clear()
++    return {"message": "Logged out"}</textarea>
+            </div>
+            <button class="btn btn-primary" id="btn-simulate-webhook">
+              <i class="fa-solid fa-paper-plane"></i> Dispatch Webhook Event
+            </button>
           </div>
-          <div class="form-group">
-            <label class="form-label">GitHub Access Token</label>
-            <input type="password" id="cfg-github-token" class="form-input" placeholder="ghp_...">
+
+          <!-- Right: Live GitHub Comment Preview -->
+          <div class="card">
+            <div class="card-title">
+              <span><i class="fa-brands fa-github"></i> GitHub Bot Comment Preview</span>
+              <span class="badge badge-green" id="bot-status-badge">Idle</span>
+            </div>
+            <div style="margin-bottom: 0.75rem; font-size: 0.82rem; color: var(--text-muted);">
+              Preview of Markdown posted back to GitHub PR/Issue discussion:
+            </div>
+            <pre id="bot-comment-preview" style="min-height: 300px; max-height: 380px; overflow-y: auto; font-size: 0.8rem; line-height: 1.45; white-space: pre-wrap; background: #090d16; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;">Click "Dispatch Webhook Event" above to see the autonomous GitHub Bot response generated in real time.</pre>
           </div>
-          <button class="btn btn-primary" id="btn-save-settings">
-            <i class="fa-solid fa-floppy-disk"></i> Save Settings
-          </button>
+        </div>
+
+        <!-- Recent Webhook Delivery Log -->
+        <div class="card">
+          <div class="card-title">
+            <span>Recent Webhook Deliveries & Bot Invocations</span>
+            <button class="btn" id="btn-refresh-bot-events" style="background: var(--bg-card-hover); border: 1px solid var(--border-color); padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh Log
+            </button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Event ID</th>
+                  <th>Event Type</th>
+                  <th>Repository</th>
+                  <th>Target #</th>
+                  <th>Title / Summary</th>
+                  <th>Delivery Status</th>
+                </tr>
+              </thead>
+              <tbody id="bot-events-table-body">
+                <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No webhook events received yet. Dispatch a simulated event above!</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 

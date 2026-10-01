@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from app.services.code_parser import code_parser
 
 
@@ -38,3 +38,27 @@ function calculateMetrics(data) {
     chunks = code_parser.parse_file("metrics.js", js_code)
     assert len(chunks) >= 1
     assert chunks[0].language == "javascript"
+
+
+def test_typescript_and_go_structural_parsing():
+    ts_code = """
+export interface UserPayload {
+    id: string;
+    role: string;
+}
+
+export class TokenManager {
+    generateToken(user: UserPayload): string {
+        return "jwt-token";
+    }
+}
+
+export const verifySession = (token: string) => {
+    return token.length > 0;
+};
+"""
+    chunks = code_parser.parse_file("session.ts", ts_code)
+    symbols = [c.symbol_name for c in chunks]
+    assert "UserPayload" in symbols
+    assert "TokenManager" in symbols
+    assert "verifySession" in symbols

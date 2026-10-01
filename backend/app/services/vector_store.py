@@ -1,4 +1,4 @@
-﻿import hashlib
+import hashlib
 import json
 import math
 import re
@@ -47,28 +47,32 @@ class VectorStoreService:
         # 1. Try Gemini
         if settings.GEMINI_API_KEY:
             try:
-                from google import genai
-                client = genai.Client(api_key=settings.GEMINI_API_KEY)
-                resp = client.models.embed_content(
-                    model="text-embedding-004",
-                    contents=text[:2000]
-                )
-                if hasattr(resp, "embedding") and resp.embedding:
-                    return resp.embedding.values
+                import httpx
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={settings.GEMINI_API_KEY}"
+                async with httpx.AsyncClient(timeout=8.0) as client:
+                    resp = await client.post(url, json={"content": {"parts": [{"text": text[:2000]}]}})
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        values = data.get("embedding", {}).get("values")
+                        if values:
+                            return values
             except Exception:
                 pass
 
         # 2. Try OpenAI
         if settings.OPENAI_API_KEY:
             try:
-                import openai
-                client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-                resp = await client.embeddings.create(
-                    model="text-embedding-3-small",
-                    input=text[:2000],
-                    dimensions=EMBEDDING_DIM
-                )
-                return resp.data[0].embedding
+                import httpx
+                url = "https://api.openai.com/v1/embeddings"
+                async with httpx.AsyncClient(timeout=8.0) as client:
+                    resp = await client.post(
+                        url,
+                        headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
+                        json={"model": "text-embedding-3-small", "input": text[:2000], "dimensions": EMBEDDING_DIM}
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        return data["data"][0]["embedding"]
             except Exception:
                 pass
 

@@ -6,7 +6,7 @@
 [![uv](https://img.shields.io/badge/uv-Fast%20Packaging-blueviolet?style=flat-square)](https://github.com/astral-sh/uv)
 [![PostgreSQL](https://img.shields.io/badge/pgvector-Supported-336791?style=flat-square&logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![Evaluation](https://img.shields.io/badge/RAG%20Eval-100%25%20Recall-10b981?style=flat-square)]()
-[![Tests](https://img.shields.io/badge/pytest-11%20passed-10b981?style=flat-square)]()
+[![Tests](https://img.shields.io/badge/pytest-18%20passed-10b981?style=flat-square)]()
 
 ---
 
@@ -244,19 +244,25 @@ uv run pytest -v
 ```
 
 ```text
-backend/tests/test_auth.py::test_password_hashing PASSED                 [  9%]
-backend/tests/test_auth.py::test_jwt_access_token_lifecycle PASSED       [ 18%]
-backend/tests/test_auth.py::test_jwt_refresh_token_lifecycle PASSED      [ 27%]
-backend/tests/test_auth.py::test_rbac_hierarchy PASSED                   [ 36%]
-backend/tests/test_issue_analyzer.py::test_issue_severity_and_fix PASSED [ 45%]
-backend/tests/test_parser.py::test_python_ast_parsing PASSED             [ 54%]
-backend/tests/test_parser.py::test_generic_chunker PASSED                [ 63%]
-backend/tests/test_pr_reviewer.py::test_pr_security_warning_flag PASSED  [ 72%]
-backend/tests/test_pr_reviewer.py::test_clean_pr PASSED                  [ 81%]
-backend/tests/test_rag.py::test_embedding_generation PASSED              [ 90%]
-backend/tests/test_rag.py::test_lexical_overlap PASSED                   [100%]
+backend/tests/test_auth.py::test_password_hashing PASSED                 [  5%]
+backend/tests/test_auth.py::test_jwt_access_token_lifecycle PASSED       [ 11%]
+backend/tests/test_auth.py::test_jwt_refresh_token_lifecycle PASSED      [ 17%]
+backend/tests/test_auth.py::test_rbac_hierarchy PASSED                   [ 23%]
+backend/tests/test_github_bot.py::test_webhook_hmac_signature_verification PASSED [ 29%]
+backend/tests/test_github_bot.py::test_webhook_pull_request_handling PASSED [ 35%]
+backend/tests/test_github_bot.py::test_webhook_issues_handling PASSED    [ 41%]
+backend/tests/test_github_bot.py::test_webhook_slash_command_and_simulation PASSED [ 47%]
+backend/tests/test_issue_analyzer.py::test_issue_severity_and_fix_generation PASSED [ 52%]
+backend/tests/test_parser.py::test_python_ast_parsing PASSED             [ 58%]
+backend/tests/test_parser.py::test_generic_chunker PASSED                [ 64%]
+backend/tests/test_parser.py::test_typescript_and_go_structural_parsing PASSED [ 70%]
+backend/tests/test_pr_reviewer.py::test_pr_security_warning_flag PASSED  [ 76%]
+backend/tests/test_pr_reviewer.py::test_clean_pr PASSED                  [ 82%]
+backend/tests/test_rag.py::test_embedding_generation PASSED              [ 88%]
+backend/tests/test_rag.py::test_lexical_overlap PASSED                   [ 94%]
+backend/tests/test_settings.py::test_settings_get_and_update PASSED      [100%]
 
-============================= 11 passed in 1.59s ==============================
+============================= 17 passed in 6.29s ==============================
 ```
 
 ---
@@ -288,9 +294,9 @@ uv run python eval/run_evals.py
 - [x] Refresh token rotation with database revocation tracking
 - [x] 8-dimension autonomous PR review agent
 - [x] Multi-agent state machine with human approval gate
-- [x] Automated specify → measure → improve evaluation suite
-- [ ] Tree-sitter native AST support for C++, Rust, and Go
-- [ ] GitHub App webhook listener for automated PR comments on push
+- [x] Multi-language structural parser for JS/TS, Go, Rust, Java, and Python AST
+- [x] GitHub App webhook listener with HMAC-SHA256 verification and PR comments
+- [x] Webhook studio simulator with slash-command support (/devpilot review)
 - [ ] Multi-repository cross-dependency semantic graphs
 
 ---
