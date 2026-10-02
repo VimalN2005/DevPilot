@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 # Add backend directory to sys.path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "backend"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")

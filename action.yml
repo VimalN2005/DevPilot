@@ -1,0 +1,57 @@
+name: "DevPilot AI Bot"
+description: "Autonomous GitHub AI reviewer & issue triage engine locked to maintainer @VimalN2005"
+author: "VimalN2005"
+branding:
+  icon: "cpu"
+  color: "purple"
+
+inputs:
+  github-token:
+    description: "GitHub Token for posting comments and reviews"
+    required: true
+    default: ${{ github.token }}
+  admin-user:
+    description: "GitHub username with merge authority"
+    required: false
+    default: "VimalN2005"
+  openai-api-key:
+    description: "Optional OpenAI API key for enhanced reasoning"
+    required: false
+    default: ""
+  gemini-api-key:
+    description: "Optional Gemini API key for enhanced reasoning"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Checkout DevPilot Engine
+      uses: actions/checkout@v4
+      with:
+        repository: "VimalN2005/DevPilot"
+        path: ".devpilot_engine"
+
+    - name: Install DevPilot Core Dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install httpx pydantic pydantic-settings pyjwt bcrypt aiosqlite cryptography pyyaml
+
+    - name: Run DevPilot Autonomous Bot Engine
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GITHUB_EVENT_PATH: ${{ github.event_path }}
+        GITHUB_EVENT_NAME: ${{ github.event_name }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_ADMIN_USER: ${{ inputs.admin-user }}
+        OPENAI_API_KEY: ${{ inputs.openai-api-key }}
+        GEMINI_API_KEY: ${{ inputs.gemini-api-key }}
+      run: |
+        python .devpilot_engine/backend/bot_runner.py
