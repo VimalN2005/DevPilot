@@ -13,6 +13,10 @@ def _get_effective_db_url() -> str:
         rel_name = url.replace("sqlite+aiosqlite:///./", "")
         db_path = settings.BASE_DIR / rel_name
         return f"sqlite+aiosqlite:///{db_path.as_posix()}"
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+asyncpg://", 1)
+    if url.startswith("postgresql://") and not url.startswith("postgresql+"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     return url
 
 effective_db_url = _get_effective_db_url()
@@ -30,7 +34,7 @@ engine = create_async_engine(
     future=True
 )
 
-if settings.DATABASE_URL.startswith("sqlite"):
+if effective_db_url.startswith("sqlite"):
     @event.listens_for(engine.sync_engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor = dbapi_connection.cursor()

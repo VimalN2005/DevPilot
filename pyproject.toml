@@ -23,6 +23,7 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "asyncpg>=0.31.0",
     "email-validator>=2.3.0",
+    "cryptography>=42.0.0",
 ]
 
 [tool.pytest.ini_options]
