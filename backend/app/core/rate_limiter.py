@@ -1,8 +1,11 @@
-﻿import time
+import time
 from collections import defaultdict
 from typing import Optional
 from fastapi import HTTPException, Request, status
-import redis
+try:
+    import redis
+except ImportError:
+    redis = None
 from app.config import settings
 
 class RateLimiter:
@@ -11,11 +14,14 @@ class RateLimiter:
     def __init__(self, requests_per_minute: int = 100):
         self.limit = requests_per_minute
         self.window = 60  # seconds
-        self.redis_client: Optional[redis.Redis] = None
+        self.redis_client = None
         self._memory_store = defaultdict(list)
         self._init_redis()
 
     def _init_redis(self):
+        if redis is None:
+            self.redis_client = None
+            return
         try:
             r = redis.from_url(settings.REDIS_URL, socket_timeout=1)
             r.ping()
